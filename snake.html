@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .list {
+      margin: 2px 0;
+    }
+    .default {
+      list-style-type: none;
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      margin: 0 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="root" id="root"></div>
+</body>
+
+<script>
+  const posArr = [], 
+        sumX = 20, 
+        sumY = 20, 
+        foodPos = {x: 0, y: 0},
+        posChange = [{x: -1, y: 0}, {x: 0, y: -1}, {x: +1, y: 0}, {x: 0, y: +1}];
+
+  let dCode = '', timer = null;
+  
+  // 生成容器
+  const root = document.getElementById('root');
+  let i = 1;
+  while(i <= sumX) {
+    let j = 1;
+    const ulNode = document.createElement('ul'); 
+    ulNode.className = 'list';
+    while(j <= sumY) {
+      const liNode = document.createElement('li');
+      liNode.className = 'default';
+      liNode.style.background = '#F0F0F0';
+      ulNode.appendChild(liNode);
+      j ++;
+    }
+    root.appendChild(ulNode);
+    i ++;
+  }
+  
+  // 鼠标按下事件
+  document.onkeydown = function(e) {
+    if(e.keyCode > 36 && e.keyCode < 41) {
+      const code = Math.abs(37 - e.keyCode)
+      dCode = Math.abs(dCode - code) === 2 ? dCode : code
+    }
+  }
+
+  start()
+
+  // 开始
+  function start() {
+    dCode = 3;
+    const initSnake = [{x: 1, y: 4}, {x: 1, y: 3}, {x: 1, y: 2}, {x: 1, y: 1}];
+    Array.prototype.push.apply(posArr, initSnake);
+
+    posArr.forEach(pos => {
+      setActive(pos, 1);
+    })
+    setNewFood();
+    timer = setInterval(renderSnake, 500);
+  }
+
+  // 停止
+  function stop() {
+    if(timer) clearInterval(timer);
+  }
+
+  // 随机生成food
+  function setNewFood() {
+    foodPos.x = Math.floor(Math.random() * sumX);
+    foodPos.y = Math.floor(Math.random() * sumY);
+
+    const isset = posArr.some(pos => {
+      return pos.x === foodPos.x && pos.y === foodPos.y;
+    })
+
+    if(isset){
+      setNewFood();
+      return false;
+    }
+
+    setActive(foodPos, 0);
+  }
+
+  // 设置active状态
+  function setActive({x, y}, type) {
+    const ulList = document.getElementsByClassName('list');
+    ulList[y].childNodes[x].style.background = type === 0 ? 'red' : 'gray';
+  }
+
+  // 移除active状态
+  function removeActive({x, y}) {
+    const ulList = document.getElementsByClassName('list');
+    ulList[y].childNodes[x].style.background = '#F0F0F0';
+  }
+
+  // 渲染snake
+  function renderSnake() {
+    if(isOver()) {
+      alert('game over');
+      stop()
+      return false
+    }
+    posArr.unshift({x: posArr[0].x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y});
+    setActive(posArr[0], 1);
+
+    const len = posArr.length;
+    const lastPos = posArr[len - 1];
+
+    removeActive(lastPos);
+    posArr.splice(posArr.length - 1, 1);
+
+    if(posArr[0].x === foodPos.x && posArr[0].y === foodPos.y) {
+      setNewFood();
+      setActive(lastPos, 1);
+      posArr.push(lastPos);
+    }
+  }
+
+  // 判断是否游戏结束
+  function isOver() {
+    let over = false
+    const firstPos = posArr[0], nextPos = {x: firstPos.x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y}
+
+    firstPos.x === 0 && dCode === 0 ? over = true : null
+    firstPos.x === sumX - 1 && dCode === 2 ? over = true : null
+    firstPos.y === 0 && dCode == 1 ? over = true : null
+    firstPos.y === sumY - 1 && dCode === 3 ? over = true : null
+
+    if(!over) {
+      over = posArr.some(pos => {
+        return pos.x === nextPos.x && pos.y === nextPos.y;
+      })
+    }
+
+    return over
+  }
+</script>
+</html>

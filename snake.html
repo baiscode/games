@@ -67,7 +67,7 @@
 
     Array.prototype.push.apply(posArr, initSnake);
 
-    posArr.forEach(pos => { setActive(pos, 1); });
+    posArr.forEach(function(pos) { setActive(pos, 1); });
     setNewFood();
     timer = setInterval(renderSnake, 500);
   }
@@ -82,7 +82,7 @@
     foodPos.x = Math.floor(Math.random() * sumX);
     foodPos.y = Math.floor(Math.random() * sumY);
 
-    const isset = posArr.some(pos => {
+    const isset = posArr.some(function(pos) {
       return pos.x === foodPos.x && pos.y === foodPos.y;
     })
 
@@ -140,7 +140,7 @@
     firstPos.y === sumY - 1 && dCode === 3 ? over = true : null;
 
     if(!over) {
-      over = posArr.some(pos => {
+      over = posArr.some(function(pos) {
         return pos.x === nextPos.x && pos.y === nextPos.y;
       })
     }

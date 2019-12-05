@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .container {
+      background: #C0C0C0;
+      display: flex;
+      padding: 20px;
+      width: 450px;
+    }
+    .box {
+      height: 150px;
+      width: 150px;
+      border: 2px solid #FFC90C;
+      overflow: scroll;
+    }
+    .box::-webkit-scrollbar {
+      height: 0;
+      width: 0;
+    }
+    .box:first-child {
+      border-right: none;
+    }
+    .box:last-child {
+      border-left: none;
+    }
+    .btn {
+      height: 30px;
+      width: 50px;
+      background: green;
+      color: #ffffff;
+      border: none;
+      outline: none;
+      margin-top: 20px;
+      cursor: pointer;
+    }
+    .icon-item {
+      height: 150px;
+      width: 150px;
+      text-align: center;
+      line-height: 150px;
+      font-size: 80px;
+      list-style-type: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="box">
+      <div class="roll"></div>
+    </div>
+    <div class="box">
+      <div class="roll"></div>
+    </div>
+    <div class="box">
+      <div class="roll"></div>
+    </div>
+  </div>
+  <button class="btn" onclick="start()">开始</button>
+  <button class="btn" onclick="slowDown()">结束</button>
+</body>
+
+<script>
+  const rolls = document.getElementsByClassName('roll');
+  const rollArr = Array.prototype.slice.call(rolls)
+
+  const icons = ["♠", "♥", "♦", "♣", "●", "◆"], colors = ['red', 'blue', 'green', 'yellow', 'orange', 'gray'];
+  const timers = new Array(3);
+
+  rollArr.forEach(function (node, i) {
+    const fragment = new DocumentFragment();
+    node.interval = 1;
+    node.space = 1;
+
+    for (let j = 0; j <= icons.length - 1; j ++) {
+      const icon = icons[j];
+      const divNode = document.createElement('div');
+      divNode.className = 'icon-item';
+      divNode.style.color = colors[j];
+      divNode.innerText = icon;
+      fragment.appendChild(divNode);
+    }
+    node.appendChild(fragment);
+    node.innerHTML = node.innerHTML += node.innerHTML;
+  })
+
+  function start() {
+    rollArr.forEach(function(node, index) {
+      rolling(index, 100, false);
+    })
+  }
+
+  function rolling(index, speed, isSlow) {
+    const node = rollArr[index]
+    timers[index] = setInterval(function() {
+      const halfY = node.offsetHeight
+      if(-50 * node.interval <= -halfY / 2) {
+        node.style.transform = 'translateY(0px)';
+        node.interval = 1
+      }
+      node.style.transform = 'translateY(' + -50 * node.interval + 'px)';
+      isSlow ? node.interval += (node.space -= 0.1) : node.interval += node.space;
+      if(node.space.toFixed(0) == 0) {
+        clearInterval(timers[index]);
+      }
+    }, speed) 
+  }
+
+  function slowDown() {
+    stop(0, function () {
+      setTimeout(function() {
+        stop(1, function() {
+          setTimeout(function() {
+            stop(2)
+          }, 1000)
+        })
+      }, 1000)
+    })
+  }
+
+  function stop(index, callback) {
+    callback = callback || function() {}
+    if(timers[index]) clearInterval(timers[index])
+    rolling(index, 500, true)
+    callback()
+  }
+</script>
+</html>

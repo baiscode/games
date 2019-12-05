@@ -15,6 +15,7 @@
       width: 25px;
       height: 25px;
       margin: 0 2px;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -52,22 +53,21 @@
   // 鼠标按下事件
   document.onkeydown = function(e) {
     if(e.keyCode > 36 && e.keyCode < 41) {
-      const code = Math.abs(37 - e.keyCode)
-      dCode = Math.abs(dCode - code) === 2 ? dCode : code
+      const code = Math.abs(37 - e.keyCode);
+      dCode = Math.abs(dCode - code) === 2 ? dCode : code;
     }
   }
 
-  start()
+  start();
 
   // 开始
   function start() {
     dCode = 3;
-    const initSnake = [{x: 1, y: 4}, {x: 1, y: 3}, {x: 1, y: 2}, {x: 1, y: 1}];
+    const initSnake = [{x: 1, y: 3}, {x: 1, y: 2}, {x: 1, y: 1}];
+
     Array.prototype.push.apply(posArr, initSnake);
 
-    posArr.forEach(pos => {
-      setActive(pos, 1);
-    })
+    posArr.forEach(pos => { setActive(pos, 1); });
     setNewFood();
     timer = setInterval(renderSnake, 500);
   }
@@ -110,8 +110,8 @@
   function renderSnake() {
     if(isOver()) {
       alert('game over');
-      stop()
-      return false
+      stop();
+      return false;
     }
     posArr.unshift({x: posArr[0].x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y});
     setActive(posArr[0], 1);
@@ -131,13 +131,13 @@
 
   // 判断是否游戏结束
   function isOver() {
-    let over = false
-    const firstPos = posArr[0], nextPos = {x: firstPos.x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y}
+    let over = false;
+    const firstPos = posArr[0], nextPos = {x: firstPos.x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y};
 
-    firstPos.x === 0 && dCode === 0 ? over = true : null
-    firstPos.x === sumX - 1 && dCode === 2 ? over = true : null
-    firstPos.y === 0 && dCode == 1 ? over = true : null
-    firstPos.y === sumY - 1 && dCode === 3 ? over = true : null
+    firstPos.x === 0 && dCode === 0 ? over = true : null;
+    firstPos.x === sumX - 1 && dCode === 2 ? over = true : null;
+    firstPos.y === 0 && dCode == 1 ? over = true : null;
+    firstPos.y === sumY - 1 && dCode === 3 ? over = true : null;
 
     if(!over) {
       over = posArr.some(pos => {
@@ -145,7 +145,7 @@
       })
     }
 
-    return over
+    return over;
   }
 </script>
 </html>

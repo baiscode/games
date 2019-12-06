@@ -28,6 +28,10 @@
     .box:last-child {
       border-left: none;
     }
+    .scroll {
+      position: relative;
+      top: 0;
+    }
     .btn {
       height: 30px;
       width: 50px;
@@ -51,21 +55,21 @@
 <body>
   <div class="container">
     <div class="box">
-      <div class="roll"></div>
+      <div class="scroll"></div>
     </div>
     <div class="box">
-      <div class="roll"></div>
+      <div class="scroll"></div>
     </div>
     <div class="box">
-      <div class="roll"></div>
+      <div class="scroll"></div>
     </div>
   </div>
   <button class="btn" onclick="start()">开始</button>
-  <button class="btn" onclick="slowDown()">结束</button>
+  <button class="btn">结束</button>
 </body>
 
 <script>
-  const rolls = document.getElementsByClassName('roll');
+  const rolls = document.getElementsByClassName('scroll');
   const rollArr = Array.prototype.slice.call(rolls)
 
   const icons = ["♠", "♥", "♦", "♣", "●", "◆"], colors = ['red', 'blue', 'green', 'yellow', 'orange', 'gray'];
@@ -96,37 +100,29 @@
 
   function rolling(index, speed, isSlow) {
     const node = rollArr[index]
-    timers[index] = setInterval(function() {
-      const halfY = node.offsetHeight
-      if(-50 * node.interval <= -halfY / 2) {
-        node.style.transform = 'translateY(0px)';
-        node.interval = 1
-      }
-      node.style.transform = 'translateY(' + -50 * node.interval + 'px)';
-      isSlow ? node.interval += (node.space -= 0.1) : node.interval += node.space;
-      if(node.space.toFixed(0) == 0) {
-        clearInterval(timers[index]);
-      }
-    }, speed) 
-  }
+    const nodeHeight = node.offsetHeight
 
-  function slowDown() {
-    stop(0, function () {
-      setTimeout(function() {
-        stop(1, function() {
-          setTimeout(function() {
-            stop(2)
-          }, 1000)
-        })
-      }, 1000)
+    // timers[index] = setInterval(function() {
+
+    //   if(node.offsetTop <= -nodeHeight / 2) {
+    //     node.style.top = 0;
+    //     clearInterval(timers[index])
+    //     return false
+    //   }
+
+    //   console.log(node.offsetTop)
+
+
+    node.style.transition = 'top 2s linear';
+    node.style.top = '-900px';
+    node.addEventListener('transitionend', function() {
+      node.style.transition = ''
+      node.style.top = 0
+      rolling(index, speed, isSlow)
     })
-  }
 
-  function stop(index, callback) {
-    callback = callback || function() {}
-    if(timers[index]) clearInterval(timers[index])
-    rolling(index, 500, true)
-    callback()
+
+    // }, speed) 
   }
 </script>
 </html>

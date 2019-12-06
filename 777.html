@@ -65,7 +65,7 @@
     </div>
   </div>
   <button class="btn" onclick="start()">开始</button>
-  <button class="btn">结束</button>
+  <button class="btn" onclick="stop()">结束</button>
 </body>
 
 <script>
@@ -94,35 +94,42 @@
 
   function start() {
     rollArr.forEach(function(node, index) {
-      rolling(index, 100, false);
+      rolling(index);
     })
   }
 
-  function rolling(index, speed, isSlow) {
+  function rolling(index) {
     const node = rollArr[index]
-    const nodeHeight = node.offsetHeight
+    startTransition(node)
+    node.addEventListener('transitionend', repeat)
+  }
 
-    // timers[index] = setInterval(function() {
+  function repeat() {
+    this.style.transition = '';
+    this.style.top = 0;
+    startTransition(this);
+  }
 
-    //   if(node.offsetTop <= -nodeHeight / 2) {
-    //     node.style.top = 0;
-    //     clearInterval(timers[index])
-    //     return false
-    //   }
+  function startTransition(node) {
+    const halfHeight = node.offsetHeight / 2
+    node.style.transition = 'top 1.5s linear';
+    node.style.top = -halfHeight + 'px';
+  }
 
-    //   console.log(node.offsetTop)
+  function stop() {
+    slowDown(0, 0.5)
+    slowDown(1, 1)
+    slowDown(2, 1.5)
+  }
 
-
-    node.style.transition = 'top 2s linear';
-    node.style.top = '-900px';
-    node.addEventListener('transitionend', function() {
-      node.style.transition = ''
-      node.style.top = 0
-      rolling(index, speed, isSlow)
-    })
-
-
-    // }, speed) 
+  function slowDown(index, delay) {
+    const node = rollArr[index]
+    const nowTop = node.offsetTop
+    const currentIcon = Math.ceil(Math.abs(nowTop) / 150)
+    const targetIcon = (currentIcon + 3) * -150
+    node.style.top = targetIcon + 'px';
+    node.style.transition = 'top 3s ease-out ' + delay + 's'
+    node.removeEventListener('transitionend', repeat)
   }
 </script>
 </html>

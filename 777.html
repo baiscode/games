@@ -47,8 +47,9 @@
       width: 150px;
       text-align: center;
       line-height: 150px;
-      font-size: 80px;
+      font-size: 85px;
       list-style-type: none;
+      text-shadow: 0 0 10px #333;
     }
   </style>
 </head>
@@ -65,27 +66,39 @@
     </div>
   </div>
   <button class="btn" onclick="start()">开始</button>
-  <button class="btn">结束</button>
+  <button class="btn" onclick="stop()">结束</button>
 </body>
 
 <script>
   const rolls = document.getElementsByClassName('scroll');
   const rollArr = Array.prototype.slice.call(rolls)
 
-  const icons = ["♠", "♥", "♦", "♣", "●", "◆"], colors = ['red', 'blue', 'green', 'yellow', 'orange', 'gray'];
+  const icons = [
+    {text: '♠', color: 'red'},
+    {text: '♥', color: 'blue'},
+    {text: '♦', color: 'green'},
+    {text: '♣', color: 'yellow'},
+    {text: '●', color: 'orange'},
+    {text: '◆', color: 'gray'},
+    {text: '■', color: 'purple'},
+    {text: '★', color: 'orangered'}
+  ]
   const timers = new Array(3);
+  let nodeHeight;
 
   rollArr.forEach(function (node, i) {
     const fragment = new DocumentFragment();
-    node.interval = 1;
-    node.space = 1;
+    const randomNum = Math.floor(Math.random() * icons.length)
 
     for (let j = 0; j <= icons.length - 1; j ++) {
-      const icon = icons[j];
+      const index = Math.abs(randomNum - j)
+      const icon = icons[index];
       const divNode = document.createElement('div');
       divNode.className = 'icon-item';
-      divNode.style.color = colors[j];
-      divNode.innerText = icon;
+      divNode.style.color = icon.color;
+      divNode.innerText = icon.text;
+      nodeHeight = divNode.offsetHeight
+
       fragment.appendChild(divNode);
     }
     node.appendChild(fragment);
@@ -93,36 +106,42 @@
   })
 
   function start() {
-    rollArr.forEach(function(node, index) {
-      rolling(index, 100, false);
+    rollArr.forEach(function(node) {
+      rolling(node);
     })
   }
 
-  function rolling(index, speed, isSlow) {
-    const node = rollArr[index]
-    const nodeHeight = node.offsetHeight
+  function rolling(node) {
+    repeat.call(node, true);
+    node.addEventListener('transitionend', repeat);
+  }
 
-    // timers[index] = setInterval(function() {
+  function repeat(isStart) {
+    this.style.transition = '';
+    this.style.top = 0;
 
-    //   if(node.offsetTop <= -nodeHeight / 2) {
-    //     node.style.top = 0;
-    //     clearInterval(timers[index])
-    //     return false
-    //   }
+    const halfHeight = this.offsetHeight / 2;
+    this.style.transition = 'top 1.5s linear';
+    this.style.top = -halfHeight + 'px';
+  }
 
-    //   console.log(node.offsetTop)
+  function stop() {
+    slowDown(0);
+    setTimeout(function() {
+      slowDown(1);
+    }, 1500)
+    setTimeout(function() {
+      slowDown(2);
+    }, 3000)
+  }
 
-
-    node.style.transition = 'top 2s linear';
-    node.style.top = '-900px';
-    node.addEventListener('transitionend', function() {
-      node.style.transition = ''
-      node.style.top = 0
-      rolling(index, speed, isSlow)
-    })
-
-
-    // }, speed) 
+  function slowDown(index) {
+    const node = rollArr[index];
+    const nowTop = node.offsetTop;
+    const currentIcon = Math.ceil(Math.abs(nowTop) / nodeHeight);
+    const targetIcon = (currentIcon + icons.length / 2) * -nodeHeight;
+    node.style.top = targetIcon + 'px';
+    node.removeEventListener('transitionend', repeat);
   }
 </script>
 </html>

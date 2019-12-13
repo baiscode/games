@@ -12,25 +12,20 @@
       padding: 20px;
       width: 450px;
     }
-    .box {
+    .list {
       height: 150px;
       width: 150px;
       border: 2px solid #FFC90C;
-      overflow: scroll;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
     }
-    .box::-webkit-scrollbar {
-      height: 0;
-      width: 0;
-    }
-    .box:first-child {
+    .list:first-child {
       border-right: none;
     }
-    .box:last-child {
+    .list:last-child {
       border-left: none;
-    }
-    .scroll {
-      position: relative;
-      top: 0;
     }
     .btn {
       height: 30px;
@@ -43,106 +38,94 @@
       cursor: pointer;
     }
     .icon-item {
+      font-size: 75px;
+      list-style-type: none;
       height: 150px;
       width: 150px;
       text-align: center;
       line-height: 150px;
-      font-size: 85px;
-      list-style-type: none;
-      text-shadow: 0 0 10px #333;
+      position: absolute;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="box">
-      <div class="scroll"></div>
-    </div>
-    <div class="box">
-      <div class="scroll"></div>
-    </div>
-    <div class="box">
-      <div class="scroll"></div>
-    </div>
+    <ul class="list"></ul>
+    <ul class="list"></ul>
+    <ul class="list"></ul>
   </div>
   <button class="btn" onclick="start()">开始</button>
   <button class="btn" onclick="stop()">结束</button>
 </body>
-
 <script>
-  console.log(1111)
-  const rolls = document.getElementsByClassName('scroll');
-  const rollArr = Array.prototype.slice.call(rolls)
-
+  const lists = document.getElementsByClassName('list');
+  const listArr = Array.prototype.slice.call(lists);
   const icons = [
-    {text: '♠', color: 'red'},
-    {text: '♥', color: 'blue'},
-    {text: '♦', color: 'green'},
-    {text: '♣', color: 'yellow'},
-    {text: '●', color: 'orange'},
-    {text: '◆', color: 'gray'},
-    {text: '■', color: 'purple'},
-    {text: '★', color: 'orangered'}
-  ]
-  const timers = new Array(3);
-  let nodeHeight;
+    {text: '♠', color: 'red'}, 
+    {text: '♥', color: 'blue'}, 
+    {text: '♦', color: 'green'}, 
+    {text: '♣', color: 'yellow'}, 
+    {text: '★', color: 'purple'}
+  ], h = 150;
+  let interval = null, timeout = null;
 
-  rollArr.forEach(function (node, i) {
+  listArr.forEach(function(list, index) {
     const fragment = new DocumentFragment();
-    const randomNum = Math.floor(Math.random() * icons.length)
-
-    for (let j = 0; j <= icons.length - 1; j ++) {
-      const index = Math.abs(randomNum - j)
-      const icon = icons[index];
-      const divNode = document.createElement('div');
-      divNode.className = 'icon-item';
-      divNode.style.color = icon.color;
-      divNode.innerText = icon.text;
-      nodeHeight = divNode.offsetHeight
-
-      fragment.appendChild(divNode);
+    for(let i = 0; i <= icons.length - 1; i ++) {
+      const li = document.createElement('li');
+      const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+      li.innerHTML = randomIcon.text;
+      li.style.color = randomIcon.color;
+      li.className = 'icon-item';
+      li.style.top = i * h + 'px';
+      fragment.appendChild(li);
     }
-    node.appendChild(fragment);
-    node.innerHTML = node.innerHTML += node.innerHTML;
+    list.appendChild(fragment);
+    list.posData = icons.map(function(icon, index) {
+      return index * h;
+    })
   })
 
   function start() {
-    rollArr.forEach(function(node) {
-      rolling(node);
+    listArr.forEach(function(list) { list.stop = false; });
+    interval = setInterval(function() {
+      listArr.forEach(function(list) {
+        if(list.stop) return false;    
+        for(let i = 0; i <= list.posData.length - 1; i ++) {
+          if(list.posData[i] > -h) {
+            list.posData[i] -= h;
+          }else {
+            list.posData[i] = h * (icons.length - 1) + list.posData[i];
+          }
+        }   
+        updateTop(list); 
+      })
+    }, 200)
+  }
+
+  function updateTop(list) {
+    const lis = list.childNodes;
+    lis.forEach(function(li, i) {
+      if(list.posData[i] < h * (icons.length - 2)) {
+        li.style.transition = 'all 200ms linear';
+      }else {
+        li.style.transition = '';
+      }
+      li.style.top = list.posData[i] + 'px';
     })
   }
 
-  function rolling(node) {
-    repeat.call(node, true);
-    node.addEventListener('transitionend', repeat);
-  }
-
-  function repeat(isStart) {
-    this.style.transition = '';
-    this.style.top = 0;
-
-    const halfHeight = this.offsetHeight / 2;
-    this.style.transition = 'top 1.5s linear';
-    this.style.top = -halfHeight + 'px';
-  }
-
-  function stop() {
-    slowDown(0);
-    setTimeout(function() {
-      slowDown(1);
-    }, 1500)
-    setTimeout(function() {
-      slowDown(2);
-    }, 3000)
-  }
-
-  function slowDown(index) {
-    const node = rollArr[index];
-    const nowTop = node.offsetTop;
-    const currentIcon = Math.ceil(Math.abs(nowTop) / nodeHeight);
-    const targetIcon = (currentIcon + icons.length / 2) * -nodeHeight;
-    node.style.top = targetIcon + 'px';
-    node.removeEventListener('transitionend', repeat);
+  function stop(i) {
+    if(!i) i = 0;
+    timeout = setTimeout(function() {
+      listArr[i].stop = true;
+      if(i === listArr.length - 1) {
+        if(interval) clearInterval(interval);
+        if(timeout) clearTimeout(timeout);
+      }else {
+        stop(++i);
+      }
+    }, i === 0 ? 0 : 1250)
   }
 </script>
 </html>

@@ -60,12 +60,27 @@
 
   start();
 
+  // 生成随机数
+  function createRandomNumber(num) {
+    return Math.floor(Math.random() * num);
+  }
+
   // 开始
   function start() {
-    dCode = 3;
-    const initSnake = [{x: 1, y: 3}, {x: 1, y: 2}, {x: 1, y: 1}];
-
-    Array.prototype.push.apply(posArr, initSnake);
+    dCode = createRandomNumber(4);
+    const initPos = {x: createRandomNumber(sumX), y: createRandomNumber(sumY)};
+    if(initPos.x < 3 || initPos.y < 3 || initPos.x > sumX - 3 || initPos.y > sumY - 3) {
+      start();
+      return false;
+    }
+    let i = 0;
+    while(i < 3) {
+      posArr.push({
+        x: initPos.x - posChange[dCode].x * i, 
+        y: initPos.y - posChange[dCode].y * i
+      });
+      i ++
+    }
 
     posArr.forEach(function(pos) { setActive(pos, 1); });
     setNewFood();
@@ -79,8 +94,8 @@
 
   // 随机生成food
   function setNewFood() {
-    foodPos.x = Math.floor(Math.random() * sumX);
-    foodPos.y = Math.floor(Math.random() * sumY);
+    foodPos.x = createRandomNumber(sumX);
+    foodPos.y = createRandomNumber(sumY);
 
     const isset = posArr.some(function(pos) {
       return pos.x === foodPos.x && pos.y === foodPos.y;
@@ -116,11 +131,10 @@
     posArr.unshift({x: posArr[0].x + posChange[dCode].x, y: posArr[0].y + posChange[dCode].y});
     setActive(posArr[0], 1);
 
-    const len = posArr.length;
-    const lastPos = posArr[len - 1];
+    const len = posArr.length, lastPos = posArr[len - 1];
 
     removeActive(lastPos);
-    posArr.splice(posArr.length - 1, 1);
+    posArr.splice(len - 1, 1);
 
     if(posArr[0].x === foodPos.x && posArr[0].y === foodPos.y) {
       setNewFood();
